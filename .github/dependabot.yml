@@ -1,4 +1,8 @@
 version: 2
+# Single designated dep-bump flow. This repo has no Python deps of its own
+# (the CMake build vendors nlohmann/json via FetchContent, version pinned
+# in tests/CMakeLists.txt and updated by hand on review). Only GitHub
+# Actions are subject to automated bumps here.
 updates:
   - package-ecosystem: github-actions
     directory: /
@@ -6,3 +10,6 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns: ["*"]
