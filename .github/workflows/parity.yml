@@ -2,24 +2,44 @@ name: parity
 
 on:
   push:
-    branches: [master, main]
+    branches: [master]
   pull_request:
+
+# Keep only the latest run per ref to minimize storage.
+concurrency:
+  group: parity-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
     runs-on: ubuntu-latest
+    env:
+      CC:  ${{ matrix.compiler == 'clang' && 'clang' || 'gcc' }}
+      CXX: ${{ matrix.compiler == 'clang' && 'clang++' || 'g++' }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install build deps
+
+      - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake build-essential python3
+          sudo apt-get install -y cmake build-essential ${{ matrix.compiler }}
+
+      # CMake FetchContent pulls nlohmann/json. Cache the resolved dep dir so
+      # the second matrix job (and subsequent runs) skip the download.
+      - name: Cache FetchContent _deps
+        uses: actions/cache@v4
+        with:
+          path: build/_deps
+          key: fetchcontent-${{ runner.os }}-nlohmann-json-3.11.3
+
       - name: Run parity verification
         run: ./proof/verify.sh
+
       - name: Diff outputs against committed proof
         run: |
-          # The committed proof/outputs/ JSONs are deterministic — re-running
-          # verify.sh should reproduce them byte-for-byte. (last_run.log has
-          # a timestamp and is not diffed.)
           git diff --exit-code proof/outputs/ \
             || (echo "proof/outputs is stale — re-run ./proof/verify.sh and commit" && exit 1)
