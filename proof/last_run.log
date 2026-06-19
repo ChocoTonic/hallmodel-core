@@ -1,0 +1,75 @@
+----- hallmodel-core parity verification -----
+date:        2026-06-19T18:07:26Z
+host:        Darwin 25.4.0 arm64
+compiler:    Apple clang version 21.0.0 (clang-2100.1.1.101)
+repo:        /Users/asdf/repos/hallmodel-core
+
+CMake Warning (dev) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1386 (message):
+  The DOWNLOAD_EXTRACT_TIMESTAMP option was not given and policy CMP0135 is
+  not set.  The policy's OLD behavior will be used.  When using a URL
+  download, the timestamps of extracted files should preferably be that of
+  the time of extraction, otherwise code that depends on the extracted
+  contents might not be rebuilt if the URL changes.  The OLD behavior
+  preserves the timestamps from the archive instead, but this is usually not
+  what you want.  Update your project to the NEW behavior or specify the
+  DOWNLOAD_EXTRACT_TIMESTAMP option with a value of true to avoid this
+  robustness issue.
+Call Stack (most recent call first):
+  tests/CMakeLists.txt:4 (FetchContent_Declare)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+[ 50%] Building CXX object CMakeFiles/bw_core.dir/src/energy.cpp.o
+[ 50%] Building CXX object CMakeFiles/bw_core.dir/src/adult.cpp.o
+[ 50%] Building CXX object CMakeFiles/bw_core.dir/src/child.cpp.o
+[ 66%] Linking CXX static library libbw_core.a
+[ 66%] Built target bw_core
+[ 83%] Building CXX object tests/CMakeFiles/parity_runner.dir/parity_runner.cpp.o
+[100%] Linking CXX executable parity_runner
+[100%] Built target parity_runner
+
+----- running parity_runner -----
+  adult_male_baseline
+  adult_male_ei2400
+  adult_female_baseline
+  adult_male_deficit
+  adult_multi
+  adult_male_pal_high
+  adult_female_pcarb
+  adult_male_dt_half
+  child_male_365d
+  child_female_730d
+  child_male_5yr
+  child_multi
+  child_male_dt_half
+  energy_linear
+  energy_exponential
+  energy_logarithmic
+  energy_stepwise_l
+  energy_stepwise_r
+18 cases ok, 0 failed
+
+----- comparing against contract/golden -----
+NOTE: skipping output key(s) ['BMI_Category'] in every case (--skip)
+
+PASS adult_female_baseline
+PASS adult_female_pcarb
+PASS adult_male_baseline
+PASS adult_male_deficit
+PASS adult_male_dt_half
+PASS adult_male_ei2400
+PASS adult_male_pal_high
+PASS adult_multi
+PASS child_female_730d
+PASS child_male_365d
+PASS child_male_5yr
+PASS child_male_dt_half
+PASS child_multi
+PASS energy_exponential
+PASS energy_linear
+PASS energy_logarithmic
+PASS energy_stepwise_l
+PASS energy_stepwise_r
+
+PARITY OK — all 18 cases within tolerance
+
+PASS: parity holds.

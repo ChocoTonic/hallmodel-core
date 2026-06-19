@@ -1,0 +1,25 @@
+name: parity
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential python3
+      - name: Run parity verification
+        run: ./proof/verify.sh
+      - name: Diff outputs against committed proof
+        run: |
+          # The committed proof/outputs/ JSONs are deterministic — re-running
+          # verify.sh should reproduce them byte-for-byte. (last_run.log has
+          # a timestamp and is not diffed.)
+          git diff --exit-code proof/outputs/ \
+            || (echo "proof/outputs is stale — re-run ./proof/verify.sh and commit" && exit 1)
