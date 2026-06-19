@@ -192,6 +192,7 @@ static json run_adult(const json& args) {
     out["Body_Mass_Index"]        = mat_to_json(res.Body_Mass_Index);
     out["BMI_Category"]           = strmat_to_json(res.BMI_Category);
     out["Energy_Intake"]          = mat_to_json(res.Energy_Intake);
+    out["Total_Expenditure"]      = mat_to_json(res.Total_Expenditure);
     out["Correct_Values"]         = res.Correct_Values;
     out["Model_Type"]             = res.Model_Type;
     return out;

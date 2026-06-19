@@ -59,6 +59,11 @@ struct AdultResult {
     Matrix              Body_Mass_Index;
     StringMatrix        BMI_Category;
     Matrix              Energy_Intake;
+    // Additive output not present in upstream R's bw::adult_weight(). Computed
+    // from the same model state (K + delta*BW + TEF(t) + AT + gammaL*L +
+    // gammaF*F) — the closed-form total energy expenditure from Hall eq 5.
+    // See proof/verify.sh for the --skip note.
+    Matrix              Total_Expenditure;
     bool                Correct_Values;
     std::string         Model_Type;
 };
@@ -227,6 +232,14 @@ private:
                           const std::vector<double>& G,
                           const std::vector<double>& AT,
                           const std::vector<double>& ECF);
+    // Total energy expenditure, Hall eq 5:
+    //   EE(t) = K + delta*BW + TEF(t) + AT + gammaL*L + gammaF*F
+    // Pure function of model state; no side effects.
+    std::vector<double> expenditure(double t,
+                                    const std::vector<double>& L,
+                                    const std::vector<double>& F,
+                                    const std::vector<double>& BW,
+                                    const std::vector<double>& AT);
     std::vector<double> fatMass(const std::vector<double>& L);
     std::vector<double> deltaEI(double t);
     std::vector<double> deltaNA(double t);

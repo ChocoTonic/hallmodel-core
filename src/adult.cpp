@@ -440,6 +440,23 @@ std::vector<double> Adult::R(double t,
     return r;
 }
 
+std::vector<double> Adult::expenditure(double t,
+                                       const std::vector<double>& L,
+                                       const std::vector<double>& F,
+                                       const std::vector<double>& BW,
+                                       const std::vector<double>& AT) {
+    // Hall eq 5: EE = K + delta*BW + TEF(t) + AT + gammaL*L + gammaF*F.
+    // TEF(t) and the K/delta members are exactly the ones used inside the
+    // dL/dt right-hand side R(), so EE is consistent with the dynamics by
+    // construction.
+    std::vector<double> tef = TEF(t);
+    std::vector<double> ee(L.size());
+    for (std::size_t i = 0; i < L.size(); ++i) {
+        ee[i] = K[i] + delta[i] * BW[i] + tef[i] + AT[i] + gammaL * L[i] + gammaF * F[i];
+    }
+    return ee;
+}
+
 std::vector<std::string> Adult::BMIClassifier(const std::vector<double>& BMI) {
     std::vector<std::string> classification(BMI.size());
     for (std::size_t i = 0; i < BMI.size(); ++i) {
@@ -476,6 +493,7 @@ AdultResult Adult::rk4(double days) {
     Matrix BW(N, T);
     Matrix BMI(N, T);
     Matrix TEI(N, T);
+    Matrix EE(N, T);
     Matrix AGE(N, T);
     StringMatrix CAT(N, T);
     std::vector<double> TIME(T, 0.0);
@@ -499,6 +517,15 @@ AdultResult Adult::rk4(double days) {
     set_col(TEI, 0, EI);
     TIME[0] = 0.0;
     set_col(AGE, 0, age);
+    {
+        // EE at t=0 — use the initial state vector.
+        std::vector<double> F0 = fatMass(lean);
+        std::vector<double> BW0(N);
+        for (std::size_t j = 0; j < N; ++j) {
+            BW0[j] = F0[j] + lean[j] + ecfinit[j] + 3.7 * G_base[j];
+        }
+        set_col(EE, 0, expenditure(0.0, lean, F0, BW0, atinit));
+    }
 
     bool correctVals = true;
 
@@ -623,6 +650,9 @@ AdultResult Adult::rk4(double days) {
 
             std::vector<double> TI = TotalIntake(TIME[ip]);
             set_col(TEI, ip, TI);
+
+            std::vector<double> ATcur = col(AT, ip);
+            set_col(EE, ip, expenditure(TIME[ip], Lcur, Fcur, BWcur, ATcur));
         }
     }
 
@@ -638,6 +668,7 @@ AdultResult Adult::rk4(double days) {
     out.Body_Mass_Index        = std::move(BMI);
     out.BMI_Category           = std::move(CAT);
     out.Energy_Intake          = std::move(TEI);
+    out.Total_Expenditure      = std::move(EE);
     out.Correct_Values         = correctVals;
     out.Model_Type             = "Adult";
     return out;

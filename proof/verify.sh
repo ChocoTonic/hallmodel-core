@@ -39,9 +39,16 @@ mkdir -p "$OUT_DIR"
   # NA. jsonlite then emits those as the literal string "NA" in every adult
   # golden. The kernel correctly computes the BMI bin strings; we exclude this
   # one field rather than fake the upstream coercion artifact.
+  #
+  # --skip Total_Expenditure: additive output not present in upstream
+  # bw::adult_weight(). Computed inside the kernel from K + delta*BW + TEF +
+  # AT + gammaL*L + gammaF*F (Hall eq 5) using the same coefficients that
+  # drive the dynamics, so EE is consistent with the parity-verified state
+  # by construction. Validated separately by a closed-form test in
+  # hallmodel-py.
   python3 "$REPO_ROOT/contract/compare.py" "$OUT_DIR" \
       --golden "$REPO_ROOT/contract/golden" \
-      --skip BMI_Category
+      --skip BMI_Category,Total_Expenditure
   echo
   echo "PASS: parity holds."
 } 2>&1 | tee "$LOG"
