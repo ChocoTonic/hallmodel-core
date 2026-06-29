@@ -21,7 +21,7 @@ jobs:
       CC:  ${{ matrix.compiler == 'clang' && 'clang' || 'gcc' }}
       CXX: ${{ matrix.compiler == 'clang' && 'clang++' || 'g++' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install toolchain
         run: |
@@ -31,7 +31,7 @@ jobs:
       # CMake FetchContent pulls nlohmann/json. Cache the resolved dep dir so
       # the second matrix job (and subsequent runs) skip the download.
       - name: Cache FetchContent _deps
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: build/_deps
           key: fetchcontent-${{ runner.os }}-nlohmann-json-3.11.3
